@@ -1,0 +1,46 @@
+version: '3'
+services:
+  prometheus-service-demo-1:
+    image: docker.io/julius/prometheus-demo-service:latest
+    ports:
+      - 10000:8080
+
+  prometheus-service-demo-2:
+    image: docker.io/julius/prometheus-demo-service:latest
+    ports:
+      - 20000:8080
+
+  prometheus-service-demo-3:
+    image: docker.io/julius/prometheus-demo-service:latest
+    ports:
+      - 30000:8080
+
+  prometheus:
+    image: docker.io/prom/prometheus:latest
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+    ports:
+      - 9090:9090
+
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    ports:
+      - 3000:3000
+
+  node-exporter:
+    image: docker.io/prom/node-exporter:latest
+    container_name: node_exporter
+    ports:
+      - 9100:9100
+    command:
+#      - "--collector.diskstats.ignored-devices=^(ram|loop|fd|(h|s|v)d[a-z]|nvme\\d+n\\d+p)\\d+$"
+      - "--collector.filesystem"
+      - "--collector.filesystem.mount-points-exclude=\"^/(dev|proc|run|sys|media|mnt|var/lib/docker/.+)($|/)\""
+
+    volumes:
+      - '/:/host:ro,rslave'
+
+volumes:
+  grafana-storage: {}
